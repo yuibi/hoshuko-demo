@@ -131,6 +131,35 @@ a:visited { color:#6c3483; }
   .page-card { box-shadow:none; }
   .image-page img { min-width:auto !important; width:100% !important; }
 }
+
+/* ── パスワードゲート ── */
+#pw-gate {
+  position:fixed; inset:0; z-index:9999;
+  background:rgba(26,82,118,0.92);
+  backdrop-filter:blur(4px);
+  display:flex; align-items:center; justify-content:center;
+}
+.pw-box {
+  background:#fff; border-radius:12px;
+  padding:36px 28px; text-align:center;
+  box-shadow:0 8px 32px rgba(0,0,0,.3);
+  max-width:320px; width:90%;
+}
+.pw-box .pw-title { margin-bottom:18px; font-size:1rem; color:#1a5276; font-weight:bold; text-indent:0; }
+#pw-input {
+  width:100%; padding:10px 12px; font-size:1rem;
+  border:2px solid #2471a3; border-radius:6px;
+  margin-bottom:12px; outline:none; text-align:center;
+  letter-spacing:.1em;
+}
+#pw-input:focus { border-color:#1a5276; }
+#pw-btn {
+  width:100%; padding:10px; font-size:1rem;
+  background:#1a5276; color:#fff; border:none;
+  border-radius:6px; cursor:pointer; font-weight:bold;
+}
+#pw-btn:hover { background:#2471a3; }
+#pw-error { color:#e74c3c; font-size:.85rem; margin-top:10px; display:none; text-indent:0; }
 </style>
 </head>
 <body>
@@ -267,5 +296,33 @@ a:visited { color:#6c3483; }
     &copy; Japanese School of Dallas（ダラス補習授業校）<br>
     4101 McEwen Rd. Suite 245, Dallas, TX 75244 U.S.A.
   </footer>
+  <div id="pw-gate">
+    <div class="pw-box">
+      <p class="pw-title">パスワードを入力してください：</p>
+      <input type="password" id="pw-input" autocomplete="off" placeholder="password">
+      <button id="pw-btn">OK</button>
+      <p id="pw-error">パスワードが違います</p>
+    </div>
+  </div>
+  <script>
+  (function(){
+    var gate=document.getElementById('pw-gate');
+    var inp=document.getElementById('pw-input');
+    var btn=document.getElementById('pw-btn');
+    var err=document.getElementById('pw-error');
+    inp.focus();
+    function check(){
+      if(inp.value==='hoshuko'){
+        gate.style.display='none';
+      }else{
+        err.style.display='block';
+        inp.value='';
+        inp.focus();
+      }
+    }
+    btn.addEventListener('click',check);
+    inp.addEventListener('keydown',function(e){if(e.key==='Enter')check();});
+  })();
+  </script>
 </body>
 </html>
