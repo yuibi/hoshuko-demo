@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="ja">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>JSDallas Domain Access Test</title>
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <title>ダラス補習校 ドメインアクセステスト</title>
+    <script src="https://accounts.google.com/gsi/client?hl=ja" async defer></script>
     <style>
       :root {
         color-scheme: light dark;
@@ -53,8 +53,8 @@
   </head>
   <body>
     <main class="card">
-      <h1>JSDallas Domain Access Test</h1>
-      <p>Sign in with your <strong>@jsdallas.org</strong> Google account to continue.</p>
+      <h1>ダラス補習校 ドメインアクセステスト</h1>
+      <p><strong>@jsdallas.org</strong> の Google アカウントでサインインしてください。</p>
 
       <div class="gsi-wrap">
         <div
@@ -62,7 +62,9 @@
           data-client_id="424630094221-ehdc3vgu2g5bthenp9vttf8q85c6pdq1.apps.googleusercontent.com"
           data-callback="handleCredentialResponse"
           data-hd="jsdallas.org"
-          data-auto_select="false"
+          data-auto_select="true"
+          data-itp_support="true"
+          data-cancel_on_tap_outside="false"
           data-ux_mode="popup"
         ></div>
         <div
@@ -72,15 +74,16 @@
           data-theme="outline"
           data-text="signin_with"
           data-size="large"
+          data-locale="ja"
         ></div>
       </div>
 
       <div id="status"></div>
 
       <section id="protected" class="protected">
-        <h2>Protected content</h2>
-        <p>You reached this because your account belongs to <code>jsdallas.org</code>.</p>
-        <button class="signout" onclick="signOut()">Sign out</button>
+        <h2>保護されたコンテンツ</h2>
+        <p>お使いのアカウントは <code>jsdallas.org</code> に所属しているため、このページにアクセスできました。</p>
+        <button class="signout" onclick="signOut()">サインアウト</button>
       </section>
     </main>
 
@@ -110,11 +113,11 @@
 
           if (hd === ALLOWED_DOMAIN && verified) {
             status.className = "status-ok";
-            status.textContent = `Welcome, ${email}.`;
+            status.textContent = `ようこそ、${email} さん。`;
             protectedEl.classList.add("visible");
           } else {
             status.className = "status-deny";
-            status.textContent = `Access denied. ${email || "This account"} is not in ${ALLOWED_DOMAIN}.`;
+            status.textContent = `アクセスが拒否されました。${email || "このアカウント"} は ${ALLOWED_DOMAIN} のアカウントではありません。`;
             protectedEl.classList.remove("visible");
             if (window.google?.accounts?.id) {
               google.accounts.id.disableAutoSelect();
@@ -122,7 +125,7 @@
           }
         } catch (err) {
           status.className = "status-deny";
-          status.textContent = "Could not verify sign-in.";
+          status.textContent = "サインインを確認できませんでした。";
           console.error(err);
         }
       }
