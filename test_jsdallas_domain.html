@@ -1,0 +1,29 @@
+<title>JSD Auth Test</title>
+  <script></script>
+
+
+  
+    ✅ You're in!
+    
+  
+
+  
+    Sign in to test
+    
+    
+    
+  
+
+  <script>
+    function handleCredentialResponse(response) {
+      const payload = JSON.parse(atob(response.credential.split('.')[1]));
+      console.log('Full payload:', payload);
+      
+      // For testing with personal Gmail, just show success
+      // Later, you'll check: payload.hd === 'jsdallas.org'
+      document.getElementById('signin').style.display = 'none';
+      document.getElementById('content').style.display = 'block';
+      document.getElementById('welcome').textContent = 
+        `Welcome, ${payload.name} (${payload.email})`;
+    }
+  </script>
