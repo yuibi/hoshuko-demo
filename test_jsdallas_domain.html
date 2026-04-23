@@ -1,29 +1,139 @@
-<title>JSD Auth Test</title>
-  <script></script>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>JSDallas Domain Access Test</title>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <style>
+      :root {
+        color-scheme: light dark;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        background: #f6f7f9;
+      }
+      .card {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+        padding: 32px;
+        max-width: 480px;
+        width: 100%;
+        text-align: center;
+      }
+      h1 { font-size: 1.25rem; margin: 0 0 8px; }
+      p  { color: #555; margin: 8px 0 20px; line-height: 1.5; }
+      #status {
+        margin-top: 20px;
+        padding: 12px;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        display: none;
+      }
+      .status-ok   { background: #e6f4ea; color: #137333; display: block !important; }
+      .status-deny { background: #fce8e6; color: #a50e0e; display: block !important; }
+      .gsi-wrap    { display: flex; justify-content: center; }
+      .protected   { display: none; margin-top: 16px; text-align: left; }
+      .protected.visible { display: block; }
+      button.signout {
+        margin-top: 12px;
+        padding: 8px 16px;
+        border: 1px solid #ccc;
+        background: #fff;
+        border-radius: 6px;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="card">
+      <h1>JSDallas Domain Access Test</h1>
+      <p>Sign in with your <strong>@jsdallas.org</strong> Google account to continue.</p>
 
+      <div class="gsi-wrap">
+        <div
+          id="g_id_onload"
+          data-client_id="424630094221-ehdc3vgu2g5bthenp9vttf8q85c6pdq1.apps.googleusercontent.com"
+          data-callback="handleCredentialResponse"
+          data-hd="jsdallas.org"
+          data-auto_select="false"
+          data-ux_mode="popup"
+        ></div>
+        <div
+          class="g_id_signin"
+          data-type="standard"
+          data-shape="rectangular"
+          data-theme="outline"
+          data-text="signin_with"
+          data-size="large"
+        ></div>
+      </div>
 
-  
-    ✅ You're in!
-    
-  
+      <div id="status"></div>
 
-  
-    Sign in to test
-    
-    
-    
-  
+      <section id="protected" class="protected">
+        <h2>Protected content</h2>
+        <p>You reached this because your account belongs to <code>jsdallas.org</code>.</p>
+        <button class="signout" onclick="signOut()">Sign out</button>
+      </section>
+    </main>
 
-  <script>
-    function handleCredentialResponse(response) {
-      const payload = JSON.parse(atob(response.credential.split('.')[1]));
-      console.log('Full payload:', payload);
-      
-      // For testing with personal Gmail, just show success
-      // Later, you'll check: payload.hd === 'jsdallas.org'
-      document.getElementById('signin').style.display = 'none';
-      document.getElementById('content').style.display = 'block';
-      document.getElementById('welcome').textContent = 
-        `Welcome, ${payload.name} (${payload.email})`;
-    }
-  </script>
+    <script>
+      const ALLOWED_DOMAIN = "jsdallas.org";
+
+      function parseJwt(token) {
+        const base64 = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+        const json = decodeURIComponent(
+          atob(base64)
+            .split("")
+            .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+            .join("")
+        );
+        return JSON.parse(json);
+      }
+
+      function handleCredentialResponse(response) {
+        const status = document.getElementById("status");
+        const protectedEl = document.getElementById("protected");
+
+        try {
+          const payload = parseJwt(response.credential);
+          const email = payload.email || "";
+          const hd = payload.hd || email.split("@")[1] || "";
+          const verified = payload.email_verified === true || payload.email_verified === "true";
+
+          if (hd === ALLOWED_DOMAIN && verified) {
+            status.className = "status-ok";
+            status.textContent = `Welcome, ${email}.`;
+            protectedEl.classList.add("visible");
+          } else {
+            status.className = "status-deny";
+            status.textContent = `Access denied. ${email || "This account"} is not in ${ALLOWED_DOMAIN}.`;
+            protectedEl.classList.remove("visible");
+            if (window.google?.accounts?.id) {
+              google.accounts.id.disableAutoSelect();
+            }
+          }
+        } catch (err) {
+          status.className = "status-deny";
+          status.textContent = "Could not verify sign-in.";
+          console.error(err);
+        }
+      }
+
+      function signOut() {
+        if (window.google?.accounts?.id) {
+          google.accounts.id.disableAutoSelect();
+        }
+        document.getElementById("status").style.display = "none";
+        document.getElementById("protected").classList.remove("visible");
+      }
+    </script>
+  </body>
+</html>
